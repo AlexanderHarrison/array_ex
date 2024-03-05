@@ -348,4 +348,15 @@ mod tests {
             [1, 2, 3, 0, 1, 2, 3, 0]
         )
     }
+    
+    #[test]
+    fn nested_4() {
+        const ARR_1: [usize; 3] = [1, 2, 3];
+        const ARR_2: [usize; 3] = [2, 3, 4];
+
+        assert_eq!(
+            array![[usize; 3], [* [ARR_1, ARR_2]; 2] ],
+            [[1, 2, 3], [2, 3, 4], [1, 2, 3], [2, 3, 4]]
+        )
+    }
 }

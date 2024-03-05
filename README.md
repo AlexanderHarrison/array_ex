@@ -44,8 +44,6 @@ array![usize,
 
     // add another constant array
     [* OTHER_CONSTANT_ARRAY],
-
-    // ... and more
 ];
 ```
 
@@ -57,6 +55,6 @@ This macro covers many more use-cases for initializing static arrays.
 
 ## Caveats
 
-- The `*` symbol is needed to diambiguate cycling elements with adding an array of arrays.
+- The `*` symbol is needed to diambiguate cycling elements with constructing an array of arrays.
     For example, `array![ [usize; 2], [[1, 2]; 3] ]` would not be parsed correctly otherwise.
 - Error messages are NOT pretty.
