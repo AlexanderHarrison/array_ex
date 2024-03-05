@@ -8,6 +8,7 @@ macro_rules! array {
         macro_rules! len {
             ($len:ident @ [* $e:expr; ..$arr_len:expr]) => { if $len < $arr_len { $len = $arr_len; } };
             ($len:ident @ [* $e:expr; $arr_len:expr]) => { $len += $e.len() * $arr_len };
+            ($len:ident @ [* $e:expr]) => { $len += $e.len() };
             ($len:ident @ [$ele:expr; ..$arr_len:expr]) => { if $len < $arr_len { $len = $arr_len; } };
             ($len:ident @ [$ele:expr; $arr_len:expr]) => { $len += $arr_len };
             ($len:ident @ $arr:expr) => { $len += $arr.len() };
@@ -15,9 +16,9 @@ macro_rules! array {
 
         macro_rules! fill {
             ($t2:ty, $arr:ident, $i:ident @ [* $e:expr; ..$len:expr]) => { 
-                const SECTION_END: usize = $len;
+                const __SECTION_END: usize = $len;
                 let mut cycle = 0;
-                while $i < SECTION_END {
+                while $i < __SECTION_END {
                     $arr[$i] = MaybeUninit::new($e[cycle]);
                     $i += 1;
                     cycle += 1;
@@ -25,10 +26,10 @@ macro_rules! array {
                 }
             };
             ($t2:ty, $arr:ident, $i:ident @ [* $e:expr; $len:expr]) => { 
-                const SECTION_LEN: usize = $len*$e.len();
+                const __SECTION_LEN: usize = $len*$e.len();
                 let mut j = 0;
                 let mut cycle = 0;
-                while j < SECTION_LEN {
+                while j < __SECTION_LEN {
                     $arr[$i] = MaybeUninit::new($e[cycle]);
                     $i += 1;
                     j += 1;
@@ -36,20 +37,29 @@ macro_rules! array {
                     if cycle == $e.len() { cycle = 0; }
                 }
             };
+            ($t2:ty, $arr:ident, $i:ident @ [* $e:expr]) => { 
+                const __SECTION_LEN: usize = $e.len();
+                let mut j = 0;
+                while j < __SECTION_LEN {
+                    $arr[$i] = MaybeUninit::new($e[j]);
+                    $i += 1;
+                    j += 1;
+                }
+            };
             ($t2:ty, $arr:ident, $i:ident @ [$ele:expr; ..$len:expr]) => {{
-                const SECTION_ELE: MaybeUninit<$t2> = MaybeUninit::new($ele);
-                const SECTION_END: usize = $len;
-                while $i < SECTION_END {
-                    $arr[$i] = SECTION_ELE;
+                const __SECTION_ELE: MaybeUninit<$t2> = MaybeUninit::new($ele);
+                const __SECTION_END: usize = $len;
+                while $i < __SECTION_END {
+                    $arr[$i] = __SECTION_ELE;
                     $i += 1;
                 }
             }};
             ($t2:ty, $arr:ident, $i:ident @ [$ele:expr; $len:expr]) => {{
-                const SECTION_ELE: MaybeUninit<$t2> = MaybeUninit::new($ele);
-                const SECTION_LEN: usize = $len;
+                const __SECTION_ELE: MaybeUninit<$t2> = MaybeUninit::new($ele);
+                const __SECTION_LEN: usize = $len;
                 let mut j = 0;
-                while j < SECTION_LEN {
-                    $arr[$i] = SECTION_ELE;
+                while j < __SECTION_LEN {
+                    $arr[$i] = __SECTION_ELE;
                     $i += 1;
                     j += 1;
                 }
@@ -65,25 +75,25 @@ macro_rules! array {
         }
 
         #[allow(unused_comparisons)]
-        const LEN: usize = {
+        const __LEN: usize = {
             let mut _len = 0;
-            $(len!(_len @ [ $($tail)* ]);)*
+            $({len!(_len @ [ $($tail)* ]);})*
             _len
         };
 
         #[allow(long_running_const_eval)]
-        const ARR: [$t; LEN] = {
+        const __ARR: [$t; __LEN] = {
             use std::mem::MaybeUninit;
             // SAFETY: undefined memory is verified during compile-time execution
-            let mut arr = unsafe { MaybeUninit::<[MaybeUninit::<$t>; LEN]>::uninit().assume_init() };
+            let mut arr = unsafe { MaybeUninit::<[MaybeUninit::<$t>; __LEN]>::uninit().assume_init() };
             let mut i = 0;
 
-            $(fill!($t, arr, i @ [ $($tail)* ]);)*
+            $({fill!($t, arr, i @ [ $($tail)* ]);})*
 
-            unsafe { std::mem::transmute::<[MaybeUninit::<$t>; LEN], [$t; LEN]>(arr) }
+            unsafe { std::mem::transmute::<[MaybeUninit::<$t>; __LEN], [$t; __LEN]>(arr) }
         };
 
-        ARR
+        __ARR
     }}
 }
 
@@ -301,6 +311,41 @@ mod tests {
         assert_eq!(
             array![NonClone, [NonClone { a: 12 }; 4]],
             [NON_CLONE; 4]
+        )
+    }
+
+    #[test]
+    fn nested_1() {
+        assert_eq!(
+            array![usize,
+                [* array![usize, [1,2,3], [0; ..5]]],
+                [1],
+            ],
+            [1, 2, 3, 0, 0, 1]
+        )
+    }
+
+    #[test]
+    fn nested_2() {
+        assert_eq!(
+            array![usize,
+                [* array![usize, [1,2,3], [0; ..5]]; 2]
+            ],
+            [1, 2, 3, 0, 0, 1, 2, 3, 0, 0]
+        )
+    }
+
+    #[test]
+    fn nested_3() {
+        const ARR: [usize; 3] = [1, 2, 3];
+        assert_eq!(
+            array![usize,
+                [* ARR],
+                [0; ..4],
+                [* ARR],
+                [0; ..8],
+            ],
+            [1, 2, 3, 0, 1, 2, 3, 0]
         )
     }
 }
