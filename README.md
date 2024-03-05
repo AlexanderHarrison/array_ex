@@ -51,9 +51,9 @@ array![usize,
 
 ## Why?
 
-Compile-time array initialization by default is not very useful.
-You either have to manually specify every elemement or are restricted to only a single element.
-This macro covers many more usecases for initializing static arrays.
+By default, rust's compile-time array initialization methods are not very useful.
+You either have to manually specify every element (`[a, b, c]`) or you are restricted to only a single element (`[a; n]`).
+This macro covers many more use-cases for initializing static arrays.
 
 ## Caveats
 
