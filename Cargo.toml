@@ -1,0 +1,10 @@
+[package]
+name = "array_ex"
+version = "1.0.0"
+edition = "2021"
+
+description = "Easy and powerful compile-time array initialization."
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["macro", "utility", "array", "no-std"]
+categories = ["rust-patterns", "no-std"]
