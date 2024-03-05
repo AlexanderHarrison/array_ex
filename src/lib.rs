@@ -1,3 +1,4 @@
+/// See readme for documentation.
 #[macro_export]
 macro_rules! array {
     ($t:ty,

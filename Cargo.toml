@@ -8,3 +8,5 @@ readme = "README.md"
 license = "MIT OR Apache-2.0"
 keywords = ["macro", "utility", "array", "no-std"]
 categories = ["rust-patterns", "no-std"]
+authors = ["Alex Harrison"]
+repository = "https://github.com/AlexanderHarrison/array_ex"
