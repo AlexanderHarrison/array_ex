@@ -37,13 +37,15 @@ array![usize,
     [* [1, 2, 3]; ..10],
 
     // add another instantiated array
-    [* array![usize, [1, 2, 3], [0; ..5]] ]
+    [* array![usize, [1, 2, 3], [0; ..5]] ],
 
     // cycle another instantiated array
-    [* array![usize, [1, 2], [0; ..4]]; 3]
+    [* array![usize, [1, 2], [0; ..4]]; 3],
 
     // add another constant array
-    [* OTHER_CONSTANT_ARRAY]
+    [* OTHER_CONSTANT_ARRAY],
+
+    // ... and more
 ];
 ```
 
