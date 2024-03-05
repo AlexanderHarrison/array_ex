@@ -2,6 +2,8 @@
 
 This crate provides an easy and powerful method of initializing arrays at compile time.
 
+[crates.io](https://crates.io/crates/array_ex)
+
 ```rust
 const ARRAY: [usize; 8] = array_ex::array![
     // specify element type
